@@ -166,7 +166,7 @@ export default function CoursePlayer({ courseId }: CoursePlayerProps) {
                                 <div key={q.id} className="p-6 bg-gray-50 dark:bg-zinc-800 rounded-2xl border border-gray-100 dark:border-zinc-700">
                                     <p className="font-bold text-lg mb-4 text-gray-900 dark:text-white">{idx + 1}. {q.question}</p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        {q.options.map((opt, optIdx) => (
+                                        {q.options.map((opt:any, optIdx:number) => (
                                             <button key={optIdx} className="p-4 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-left hover:border-blue-500 hover:text-blue-600 transition-all font-medium text-sm">
                                                 {opt}
                                             </button>
