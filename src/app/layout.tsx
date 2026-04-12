@@ -20,7 +20,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={lang} suppressHydrationWarning>
       <body>
+    <Providers>
     <LenisProvider>{children}</LenisProvider>
+  </Providers>
       </body>
     </html>
   );
