@@ -44,46 +44,55 @@ export function FeaturedCourses() {
     <section className="py-24 bg-background from-transparent to-secondary/20">
       <div className="container mx-auto space-y-12 px-4 sm:px-6 lg:px-8">
 
-        {/* ================= TITLE ================= */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-border pb-10">
-          <div className="space-y-4 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 text-xs font-black uppercase text-primary tracking-widest">
-              <Star className="w-3 h-3 fill-primary" />
-              {t("extra.voices_success") || "Top Rated"}
+        {/* ================= HEADER ================= */}
+        <div className="space-y-6 border-b border-primary/10 pb-0">
+          {/* ================= TITLE ================= */}
+          <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+            <div className="space-y-4 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full border border-primary/20 text-xs font-black uppercase text-primary tracking-widest">
+                <Star className="w-3 h-3 fill-primary" />
+                {t("extra.voices_success") || "Top Rated"}
+              </div>
+
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-foreground">
+                {t("home.featured")}
+              </h2>
+
+              <p className="text-muted-foreground text-lg max-w-xl font-medium">
+                {t("home.featured_desc")}
+              </p>
             </div>
-
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-foreground">
-              {t("home.featured")}
-            </h2>
-
-            <p className="text-muted-foreground text-lg max-w-xl font-medium">
-              {t("home.featured_desc")}
-            </p>
           </div>
 
-          <Link
-            href="/courses"
-            className="hidden md:flex h-12 items-center gap-2 rounded-2xl bg-primary px-8 text-sm font-black text-white shadow-xl shadow-primary/20 hover:translate-y-[-2px]"
-          >
-            {t("home.view_all")}
-          </Link>
-        </div>
+          {/* ================= CATEGORY FILTER & VIEW ALL ================= */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-0">
+            <div className="flex flex-wrap items-center gap-8 justify-center md:justify-start">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`relative py-4 text-xs font-black uppercase tracking-[0.2em] cursor-pointer transition-all ${
+                    selectedCategory === cat
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary"
+                  }`}
+                >
+                  {cat}
+                  {selectedCategory === cat && (
+                    <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-t-full" />
+                  )}
+                </button>
+              ))}
+            </div>
 
-        {/* ================= CATEGORY FILTER ================= */}
-        <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${
-                selectedCategory === cat
-                  ? "bg-primary text-white border-primary scale-105"
-                  : "bg-background text-muted-foreground border-border hover:border-primary/50"
-              }`}
+            <Link
+              href="/courses"
+              className="hidden md:flex items-center gap-2 group text-sm font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
             >
-              {cat}
-            </button>
-          ))}
+              {t("home.view_all")}
+              <div className="w-8 h-[1px] bg-muted-foreground group-hover:bg-primary transition-all group-hover:w-12" />
+            </Link>
+          </div>
         </div>
 
         {/* ================= COURSES ================= */}
@@ -92,7 +101,7 @@ export function FeaturedCourses() {
             ? skeletons.map((_, idx) => (
                 <div
                   key={idx}
-                  className="animate-pulse bg-card rounded-3xl overflow-hidden border border-border h-96"
+                  className="animate-pulse bg-card rounded-2xl overflow-hidden border border-primary/10 h-96"
                 >
                   <div className="bg-muted h-52 w-full" />
                   <div className="p-6 space-y-4">
@@ -106,7 +115,7 @@ export function FeaturedCourses() {
                 <Link
                   key={course.id}
                   href={`/courses/${course.id}`}
-                  className="group flex flex-col bg-card rounded-[2rem] overflow-hidden border hover:shadow-xl transition-all hover:-translate-y-2"
+                  className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-primary/10 hover:shadow-xl transition-all hover:-translate-y-2"
                 >
                   {/* IMAGE */}
                   <div className="relative aspect-[4/3] overflow-hidden">

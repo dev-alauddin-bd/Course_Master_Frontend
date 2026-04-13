@@ -12,7 +12,7 @@ export function Testimonials() {
   const finalReviews = reviewData?.data || [];
 
   return (
-    <section className="py-24 bg-background relative overflow-hidden">
+    <section className="py-24 relative overflow-hidden">
    
       <div className="container mx-auto px-4 relative z-10">
         
@@ -70,7 +70,7 @@ export function Testimonials() {
 function ReviewCard({ review }: { review: any }) {
   const reviewer = review.user || {};
   return (
-    <div className="inline-flex flex-col w-[350px] sm:w-[450px] bg-card/40 backdrop-blur-xl p-10 rounded-[3rem] border border-border/60 hover:border-primary/40 transition-all duration-500 hover:shadow-[0_20px_50px_-10px_rgba(var(--primary),0.1)] group">
+    <div className="inline-flex flex-col w-[350px] sm:w-[450px] bg-card/40 backdrop-blur-xl p-10 rounded-[3rem] border border-primary/10 hover:border-primary/30 transition-all duration-500 hover:shadow-[0_20px_50px_-10px_rgba(var(--primary),0.1)] group">
       
       {/* Top Section: Rating & Quote Icon */}
       <div className="flex items-center justify-between mb-8">
@@ -79,7 +79,9 @@ function ReviewCard({ review }: { review: any }) {
             <Star key={i} className={`w-3.5 h-3.5 ${i < review.rating ? "fill-primary text-primary" : "text-muted-foreground/30"}`} />
           ))}
         </div>
-        <Quote className="w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
+        <div className="w-12 h-12 bg-primary/5 rounded-2xl flex items-center justify-center border border-primary/10 group-hover:bg-primary/10 transition-colors">
+          <Quote className="w-6 h-6 text-primary/20 group-hover:text-primary transition-colors" />
+        </div>
       </div>
 
       {/* Testimonial Content */}
@@ -88,14 +90,14 @@ function ReviewCard({ review }: { review: any }) {
       </p>
 
       {/* Reviewer Details */}
-      <div className="flex items-center gap-4 border-t border-border/50 pt-8">
+      <div className="flex items-center gap-4 border-t border-primary/10 pt-8">
         <div className="relative">
           <img 
             src={reviewer.avatar || `https://i.pravatar.cc/150?u=${reviewer.name}`} 
             alt={reviewer.name} 
             className="w-14 h-14 rounded-2xl object-cover border-2 border-background shadow-lg group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0" 
           />
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full border-2 border-background flex items-center justify-center">
+          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full border-2 border-background flex items-center justify-center shadow-sm">
              <Star className="w-2.5 h-2.5 fill-primary-foreground text-primary-foreground" />
           </div>
         </div>

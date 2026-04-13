@@ -11,6 +11,19 @@
     "about": "About Us",
     "contact": "Contact"
   },
+  "contact": {
+    "badge": "Get in Touch",
+    "title": "Let's start a conversation.",
+    "subtitle": "Have a question about our courses or need a custom solution for your team? We're here to help.",
+    "email_us": "Email Us",
+    "live_support": "Live Support",
+    "our_studio": "Our Studio",
+    "socials": "Socials",
+    "rapid_response": "Rapid Response Team",
+    "sla_desc": "Our global team ensures that no message goes unanswered. We typically respond faster than you can brew a cup of coffee.",
+    "avg_wait": "Avg. Wait",
+    "satisfaction": "Satisfaction"
+  },
   "home": {
     "title": "Learn Anything, Anytime",
     "subtitle": "Access thousands of courses from expert instructors worldwide",
@@ -159,7 +172,18 @@
     "instructor_cta_millions": "millions",
     "instructor_cta_desc": "Create a beautiful course in minutes. Get paid monthly. Reach students around the globe.",
     "learn_how_works": "Learn How it Works",
-    "avg_earnings_label": "Average Monthly Earnings per Expert"
+    "avg_earnings_label": "Average Monthly Earnings per Expert",
+    "send_message": "Send a Message",
+    "submit": "Send Message",
+    "expected_response": "under 2 hours",
+    "full_name": "Full Name",
+    "email_address": "Email Address",
+    "subject": "Subject",
+    "your_message": "Your Message",
+    "placeholder_name": "John Doe",
+    "placeholder_email": "john@example.com",
+    "placeholder_subject": "What is this regarding?",
+    "placeholder_message": "Tell us how we can help..."
   },
   "footer": {
     "explore": "Explore Courses",

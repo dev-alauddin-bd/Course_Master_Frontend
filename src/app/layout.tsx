@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/ReduxProvider";
 import { cookies } from 'next/headers'; // next 13.4+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import LenisProvider from "./LenisProvider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -22,6 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
     <Providers>
     <LenisProvider>{children}</LenisProvider>
+    <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
   </Providers>
       </body>
     </html>
