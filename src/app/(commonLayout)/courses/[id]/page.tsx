@@ -5,9 +5,14 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useGetCourseByIdQuery, useEnrollCourseMutation, useCreateCheckoutMutation } from "@/redux/features/course/courseAPi";
 import {
    PlayCircle, BookOpen, Clock, Users, Star, CheckCircle,
-   ChevronDown, ChevronUp, Loader2, Award, Zap, Shield, X, MonitorPlay, BarChart
+   ChevronDown, ChevronUp, Loader2, Award, Zap, Shield, X, MonitorPlay, BarChart,
+   MessageSquare, Quote, Send, Check
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { useCreateReviewMutation } from "@/redux/features/review/reviewApi";
+import { IReview } from "@/interfaces/course.interface";
 
 export default function EnhancedCourseDetailsPage() {
    const params = useParams();
@@ -17,12 +22,19 @@ export default function EnhancedCourseDetailsPage() {
    const { data: courseResponse, isLoading, refetch } = useGetCourseByIdQuery(courseId, {
       skip: !courseId
    });
-   console.log("res", courseResponse)
 
    const [enrollCourse, { isLoading: isEnrolling }] = useEnrollCourseMutation();
    const [createCheckout, { isLoading: isCheckingOut }] = useCreateCheckoutMutation();
+   const [createReview] = useCreateReviewMutation();
+   
+   const user = useSelector(selectCurrentUser);
+   
    const [activeModule, setActiveModule] = useState<string | null>(null);
    const [showVideoModal, setShowVideoModal] = useState(false);
+   
+   const [rating, setRating] = useState(5);
+   const [comment, setComment] = useState("");
+   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
    useEffect(() => {
       window.scrollTo(0, 0);
@@ -38,18 +50,15 @@ export default function EnhancedCourseDetailsPage() {
 
    // Set the first module active by default when data loads
    useEffect(() => {
-      if (courseResponse?.data?.modules?.length && !activeModule) {
+      if (courseResponse?.data?.modules && courseResponse.data.modules.length > 0 && !activeModule) {
          setActiveModule(courseResponse.data.modules[0].id);
       }
-   }, [courseResponse]);
+   }, [courseResponse, activeModule]);
 
    const course = courseResponse?.data;
    const isEnrolled = course?.isEnrolled;
-   console.log(isEnrolled)
 
    const handleEnrollment = async () => {
-      console.log("click hooise")
-
       try {
          const isFree = course?.price === 0;
          
@@ -59,7 +68,6 @@ export default function EnhancedCourseDetailsPage() {
             refetch();
          } else {
             const res = await createCheckout(courseId).unwrap();
-            console.log("res", res.data?.paymentUrl)
             if (res.data?.paymentUrl) {
                window.location.href = res.data.paymentUrl;
             } else {
@@ -78,6 +86,31 @@ export default function EnhancedCourseDetailsPage() {
 
    const toggleModule = (moduleId: string) => {
       setActiveModule(activeModule === moduleId ? null : moduleId);
+   };
+
+   const handleSubmitReview = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!comment.trim()) {
+         toast.error("Please enter a comment");
+         return;
+      }
+
+      try {
+         setIsSubmittingReview(true);
+         await createReview({
+            courseId,
+            rating,
+            content: comment,
+         }).unwrap();
+         toast.success("Review submitted successfully!");
+         setComment("");
+         setRating(5);
+         refetch();
+      } catch (err: any) {
+         toast.error(err?.data?.message || "Failed to submit review");
+      } finally {
+         setIsSubmittingReview(false);
+      }
    };
 
    if (isLoading) {
@@ -106,7 +139,7 @@ export default function EnhancedCourseDetailsPage() {
 
    // Calculate total duration roughly (assuming lesson.duration is in minutes)
    const totalDurationMinutes = course.modules?.reduce((acc, m) => {
-      return acc + (m.lessons?.reduce((lAcc: number, l: any) => lAcc + (l.duration || 0), 0) || 0)
+      return acc + (m.lessons?.reduce((lAcc: number, l) => lAcc + (l.duration || 0), 0) || 0);
    }, 0) || 0;
    const hours = Math.floor(totalDurationMinutes / 60);
    const minutes = totalDurationMinutes % 60;
@@ -143,11 +176,11 @@ export default function EnhancedCourseDetailsPage() {
                   <div className="flex flex-wrap items-center gap-8 pt-6">
                      <div className="flex items-center gap-4 bg-muted/50 py-2 px-5 rounded-full border border-border">
                         <div className="w-10 h-10 rounded-full bg-primary/20 overflow-hidden flex items-center justify-center">
-                           <span className="font-black text-sm text-primary uppercase">{(course.instructor as any)?.name?.slice(0, 2) || "IN"}</span>
+                           <span className="font-black text-sm text-primary uppercase">{course.instructor?.name?.slice(0, 2) || "IN"}</span>
                         </div>
                         <div>
                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Instructor</p>
-                           <p className="text-sm font-bold text-foreground">{(course.instructor as any)?.name || "Expert Instructor"}</p>
+                           <p className="text-sm font-bold text-foreground">{course.instructor?.name || "Expert Instructor"}</p>
                         </div>
                      </div>
 
@@ -214,12 +247,12 @@ export default function EnhancedCourseDetailsPage() {
                      </div>
                   </div>
 
+                  {/* Curriculum Structure */}
                   <div>
                      <h2 className="text-3xl font-black tracking-tight mb-8 flex items-center gap-4">
                         <Zap className="text-amber-500" /> Course Curriculum Structure
                      </h2>
 
-                     {/* Modules Accordion */}
                      <div className="space-y-4">
                         {course.modules && course.modules.length > 0 ? (
                            course.modules.map((module, index) => (
@@ -240,7 +273,7 @@ export default function EnhancedCourseDetailsPage() {
                                           <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-2 flex items-center gap-3">
                                              <span className="flex items-center gap-1"><MonitorPlay className="w-3 h-3" /> {module.lessons?.length || 0} Lessons</span>
                                              <span className="w-1 h-1 rounded-full bg-border"></span>
-                                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {(module.lessons?.reduce((acc: number, l: any) => acc + (l.duration || 0), 0) || 0)} mins</span>
+                                             <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {(module.lessons?.reduce((mAcc: number, l) => mAcc + (l.duration || 0), 0) || 0)} mins</span>
                                           </div>
                                        </div>
                                     </div>
@@ -254,7 +287,7 @@ export default function EnhancedCourseDetailsPage() {
                                        <div className="p-2 border border-border/50 rounded-3xl bg-secondary/20">
                                           {module.lessons && module.lessons.length > 0 ? (
                                              <div className="space-y-1">
-                                                {module.lessons.map((lesson: any, lIndex: number) => (
+                                                {module.lessons.map((lesson, lIndex) => (
                                                    <div key={lesson.id} className="flex items-center justify-between p-4 rounded-[1.5rem] hover:bg-background transition-colors group border border-transparent hover:border-border/80 hover:shadow-sm">
                                                       <div className="flex items-center gap-4">
                                                          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center group-hover:bg-primary/10 transition-colors">
@@ -283,6 +316,118 @@ export default function EnhancedCourseDetailsPage() {
                               <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
                               <p className="font-black text-xl italic text-foreground mb-2">Curriculum in Progress.</p>
                               <p className="text-sm font-medium text-muted-foreground max-w-sm mx-auto">The instructor is actively structuring the modules and lessons for this course.</p>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+
+                  {/* =======================
+                      REVIEWS SECTION
+                  ======================= */}
+                  <div className="pt-8 border-t border-border/50">
+                     <div className="flex items-center justify-between mb-10">
+                        <h2 className="text-3xl font-black tracking-tight flex items-center gap-4">
+                           <MessageSquare className="text-primary" /> Student Reviews
+                        </h2>
+                        <div className="flex items-center gap-1.5 px-4 py-2 bg-secondary rounded-full border border-border">
+                           <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                           <span className="text-sm font-black">{course.reviews && course.reviews.length > 0 ? (course.reviews.reduce((acc: number, r: IReview) => acc + r.rating, 0) / course.reviews.length).toFixed(1) : "0.0"}</span>
+                           <span className="text-[10px] font-bold text-muted-foreground uppercase border-l border-border/50 pl-2 ml-1">{course.reviews?.length || 0} Reviews</span>
+                        </div>
+                     </div>
+
+                     {/* Review Form for Enrolled Users */}
+                     {isEnrolled && user && !course.reviews?.some((r: IReview) => r.userId === user.id) && (
+                        <div className="mb-16 p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20 relative overflow-hidden group">
+                           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] -mr-10 -mt-10 group-hover:scale-110 transition-transform"></div>
+                           
+                           <h3 className="text-xl font-black mb-6">Share Your Experience</h3>
+                           <form onSubmit={handleSubmitReview} className="space-y-6 relative z-10">
+                              <div className="space-y-3">
+                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Your Rating</label>
+                                 <div className="flex gap-2">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                       <button
+                                          key={star}
+                                          type="button"
+                                          onClick={() => setRating(star)}
+                                          className="transform transition-all hover:scale-125 hover:-rotate-12"
+                                       >
+                                          <Star className={`w-8 h-8 ${star <= rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"}`} />
+                                       </button>
+                                    ))}
+                                 </div>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Your Feedback</label>
+                                 <textarea
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Tell us what you liked about this course..."
+                                    className="w-full h-32 p-6 rounded-3xl bg-background border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium resize-none"
+                                 />
+                              </div>
+
+                              <button
+                                 type="submit"
+                                 disabled={isSubmittingReview}
+                                 className="h-14 px-8 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                              >
+                                 {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                 Submit Review
+                              </button>
+                           </form>
+                        </div>
+                     )}
+
+                     {/* Reviews List */}
+                     <div className="space-y-8">
+                        {course.reviews && course.reviews.length > 0 ? (
+                           course.reviews.map((review: IReview) => (
+                              <div key={review.id} className="p-8 rounded-[2rem] bg-card border border-border/60 hover:border-primary/30 transition-all group">
+                                 <div className="flex flex-col md:flex-row gap-6">
+                                    <div className="flex-shrink-0">
+                                       <div className="relative">
+                                          <img
+                                             src={review.user?.avatar || `https://i.pravatar.cc/150?u=${review.user?.name}`}
+                                             alt={review.user?.name}
+                                             className="w-16 h-16 rounded-2xl object-cover border-2 border-background shadow-lg grayscale group-hover:grayscale-0 transition-all duration-500"
+                                          />
+                                          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 rounded-full border-2 border-background flex items-center justify-center">
+                                             <Check className="w-3 h-3 text-white" />
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div className="flex-1 space-y-4">
+                                       <div className="flex items-center justify-between">
+                                          <div>
+                                             <h4 className="font-black text-lg text-foreground leading-none mb-1">{review.user?.name || "Verified Learner"}</h4>
+                                             <div className="flex gap-1">
+                                                {[...Array(5)].map((_, i) => (
+                                                   <Star key={i} className={`w-3 h-3 ${i < review.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/20"}`} />
+                                                ))}
+                                             </div>
+                                          </div>
+                                          <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-50 group-hover:opacity-100 transition-opacity">
+                                             {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                          </span>
+                                       </div>
+                                       <div className="relative">
+                                          <Quote className="absolute -top-4 -left-4 w-8 h-8 text-primary/5 -z-10" />
+                                          <p className="text-muted-foreground font-medium leading-relaxed italic pr-4">
+                                             &quot;{review.content}&quot;
+                                          </p>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+                           ))
+                        ) : (
+                           <div className="py-20 text-center border border-border/50 border-dashed rounded-[3rem] bg-secondary/10">
+                              <MessageSquare className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                              <p className="font-black text-xl italic text-foreground mb-2">No Reviews Yet.</p>
+                              <p className="text-sm font-medium text-muted-foreground max-w-sm mx-auto">Be the first to share your learning experience!</p>
                            </div>
                         )}
                      </div>

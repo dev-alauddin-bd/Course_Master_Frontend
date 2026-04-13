@@ -11,6 +11,7 @@ export interface ICourse {
   previewVideo: string;
   price: number;
   instructor?: {
+    id: string;
     name: string;
     avatar?: string | null;
   } | null;
@@ -20,9 +21,26 @@ export interface ICourse {
   modules?: IModule[];
   createdAt: string | Date;
   updatedAt: string | Date;
+  reviews?: IReview[];
   _count?: {
     enrolledUsers: number;
+    reviews: number;
   };
+}
+
+export interface IReview {
+  id: string;
+  content: string;
+  rating: number;
+  userId: string;
+  courseId: string;
+  isPublished: boolean;
+  user?: {
+    name: string;
+    avatar?: string | null;
+  };
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export interface IModule {
